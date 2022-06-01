@@ -1,7 +1,4 @@
 #[macro_use] extern crate rocket;
-
-mod responses;
-
 use rocket::request::FlashMessage;
 use rocket::response::{Flash, Redirect};
 use rocket::form::Form;
@@ -79,7 +76,7 @@ fn find_user(user: String) -> bool {
 
 // ------ Users "/users" Handlers ------
 #[post("/create", data="<create_info>")]
-fn create(create_info: Form<CreateInfo>, cookies: &CookieJar<'_>) -> Result<Redirect, Flash<Redirect>> {
+fn create(create_info: Form<CreateInfo>) -> Result<Redirect, Flash<Redirect>> {
     let pass_hash = hash_pass(&create_info.password);
     
     if find_user(create_info.username.clone()) == true{
@@ -147,32 +144,32 @@ fn index(cookies: &CookieJar<'_>) -> Template {
 }
 
 #[get("/login")]
-fn login_page(flash: Option<FlashMessage<'_>>, cookies: &CookieJar<'_>) -> responses::AnyResponse{
+fn login_page(flash: Option<FlashMessage<'_>>, cookies: &CookieJar<'_>) -> Result<Template, Redirect>{
     let cookie = cookies.get_private("user_id");
     if cookie.is_none() == false{
-        return responses::AnyResponse::redirect(Redirect::to(uri!(index)));
+        return Err(Redirect::to(uri!(index)));
     }
 
     let msg = flash.map(|flash| format!("{}", flash.message()))
         .unwrap_or_else(|| "none".to_string());
 
-    return responses::AnyResponse::template(Template::render("login", &LoginContext{
+    return Ok(Template::render("login", &LoginContext{
         user_id: "none".to_string(),
         message: msg
     }));
 }
 
 #[get("/register")]
-fn register(flash: Option<FlashMessage<'_>>, cookies: &CookieJar<'_>) -> responses::AnyResponse{
+fn register(flash: Option<FlashMessage<'_>>, cookies: &CookieJar<'_>) -> Result<Template, Redirect>{
     let cookie = cookies.get_private("user_id");
     if cookie.is_none() == false{
-        return responses::AnyResponse::redirect(Redirect::to(uri!(index)));
+        return Err(Redirect::to(uri!(index)));
     }
 
     let msg = flash.map(|flash| format!("{}", flash.message()))
         .unwrap_or_else(|| "none".to_string());
 
-    return responses::AnyResponse::template(Template::render("register", &LoginContext{
+    return Ok(Template::render("register", &LoginContext{
         user_id: "none".to_string(),
         message: msg
     }));
@@ -181,8 +178,8 @@ fn register(flash: Option<FlashMessage<'_>>, cookies: &CookieJar<'_>) -> respons
 
 #[get("/about")]
 fn about() -> Template {
-    Template::render("about", &AboutContext {
-        parent: "layout"
+    Template::render("about", &IndexContext {
+        user_id: "layout".to_string()
     })
 }
 

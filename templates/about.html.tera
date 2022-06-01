@@ -1,4 +1,7 @@
-<section id="about">
-  <h1>About</h1>
-  This is an example web application built with Rust and the Rocket framework.
-</section>
+{% include "header"%}
+
+<h1>About</h1>
+
+<h3>Created by Tyler Nicewarner</h3>
+
+<p>This site is a learning experiance for me so it will have many odd and potetially clashing features. I am using this project to see what I can do using Rust to create a website.</p>
