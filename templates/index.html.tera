@@ -1,0 +1,7 @@
+{% include "header"%}
+
+{% if user_id == "none" %}
+   <h1>Welcome</h1>
+{% else %}
+    <h1>Welcome {{ user_id }}</h1>
+{% endif %}
