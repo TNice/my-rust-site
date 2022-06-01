@@ -2,14 +2,17 @@
 use rocket::request::FlashMessage;
 use rocket::response::{Flash, Redirect};
 use rocket::form::Form;
+use rocket::fs::{FileServer, relative};
+use rocket::http::{Status, CookieJar, Cookie};
 use rocket_dyn_templates::{Template};
 use rocket::serde::{Deserialize, Serialize, json::Json};
 use std::fs::File;
 use std::io::{Write, BufReader, BufRead};
+use std::fs::OpenOptions;
 use crypto::digest::Digest;
 use crypto::sha3::Sha3;
-use std::fs::OpenOptions;
-use rocket::http::{Status, CookieJar, Cookie};
+
+
 
 // ------ Structs ------
 #[derive(serde::Serialize)]
@@ -177,9 +180,16 @@ fn register(flash: Option<FlashMessage<'_>>, cookies: &CookieJar<'_>) -> Result<
 
 
 #[get("/about")]
-fn about() -> Template {
-    Template::render("about", &IndexContext {
-        user_id: "layout".to_string()
+fn about(cookies: &CookieJar<'_>) -> Template {
+    let cookie = cookies.get_private("user_id");
+    let mut user_id = "none".to_string();
+    
+    if cookie.is_none() == false{
+        user_id = cookie.unwrap().value().to_string();
+    }
+
+    Template::render("about", &IndexContext{
+        user_id: user_id
     })
 }
 
@@ -189,6 +199,7 @@ fn about() -> Template {
 fn rocket() -> _ {
     rocket::build()
     .attach(Template::fairing())
+    .mount("/static", FileServer::from(relative!("/static")))
     .mount("/", routes![index, about, login_page, register])
     .mount("/users", routes![logout, login, create])
 }
