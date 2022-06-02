@@ -11,9 +11,25 @@
       <li class="nav-item">
         <a class="nav-link active" href="/">Home</a>
       </li>
-     <li class="nav-item">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Resume</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Publications</a>
+      </li>
+      <li class="nav-item dropdown">
+        <div class="btn-group">
+          <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Projects</a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a class="dropdown-item" href="/account">project 1</a></li>
+            <li><a class="dropdown-item" href="/users/logout">project 2</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item">
         <a class="nav-link active" href="/about">About</a>
       </li>
+
     </ul>
     <ul class="navbar-nav ms-auto">
       {% if user_id == "none" %}
