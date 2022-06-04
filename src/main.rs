@@ -88,14 +88,16 @@ fn create(create_info: Form<CreateInfo>) -> Result<Redirect, Flash<Redirect>> {
 
 #[post("/login", data="<login_info>")]
 fn login(login_info: Form<LoginInfo>, cookies: &CookieJar<'_>) -> Result<Redirect, Flash<Redirect>> {
-    let input = File::open("C:/Users/tyler/OneDrive/Desktop/RustStuff/our-site/site-server/src/users.txt");
+    let input = File::open("C:/Users/tyler/OneDrive/Desktop/RustStuff/our-site/src/users.txt");
     let buffer = BufReader::new(input.unwrap());
 
+    println!("test0");
     for line in buffer.lines(){
         let l: String = line.unwrap();
         let parts: Vec<&str> = l.split(":").collect();
 
         if parts[0].eq(&login_info.username){
+            println!("test2");
             let hash = hash_pass(&login_info.password);
             if parts[1] == hash{
                 cookies.add_private(Cookie::new("user_id", login_info.username.clone()));    
@@ -106,6 +108,7 @@ fn login(login_info: Form<LoginInfo>, cookies: &CookieJar<'_>) -> Result<Redirec
             break;
         }      
     }
+    println!("test1");
     Ok(Redirect::to(uri!(index)))
 }
 

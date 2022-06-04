@@ -28,15 +28,6 @@ impl Context<LoginContext>{
     }
 }
 
-// impl Context<AboutContext>{
-//     pub fn new(user_id: String) -> Context<AboutContext>{
-//         Context{
-//             user_id: user_id,
-//             info: AboutContext { }
-//         }
-//     }
-// }
-
 impl Context<ProjectContext>{
     pub fn project(user_id: String, paths: Vec<String>, files_names: Vec<String>, project_name: String, project_desc: String) -> Context<ProjectContext>{
         Context{
