@@ -5,41 +5,18 @@ use rocket::form::Form;
 use rocket::fs::{FileServer, relative};
 use rocket::http::{Status, CookieJar, Cookie};
 use rocket_dyn_templates::{Template};
+use std::collections::HashMap;
 use rocket::serde::{Deserialize, Serialize, json::Json};
-use std::borrow::Borrow;
 use std::fs::File;
 use std::io::{Write, BufReader, BufRead};
-use std::collections::HashMap;
 use std::fs::OpenOptions;
 use crypto::digest::Digest;
 use crypto::sha3::Sha3;
 
-// ------ Structs ------
-#[derive(serde::Serialize)]
-struct IndexContext {
-    user_id: String
-}
+mod contexts;
+use contexts::Context;
 
-#[derive(serde::Serialize)]
-struct LoginContext {
-    user_id: String,
-    message: String
-}
-
-#[derive(serde::Serialize)]
-struct AboutContext{
-    parent: &'static str,
-}
-
-#[derive(serde::Serialize)]
-struct ProjectContext{
-    user_id: String,
-    paths: Vec<String>,
-    file_names: Vec<String>,
-    project_name: String,
-    project_desc: String
-}
-
+//----- Data ----
 #[derive(Deserialize)]
 pub struct AuthInfo {
     pub user_id: String,
@@ -150,9 +127,7 @@ fn index(cookies: &CookieJar<'_>) -> Template {
         user_id = cookie.unwrap().value().to_string();
     }
 
-    Template::render("index", &IndexContext{
-        user_id: user_id
-    })
+    Template::render("index", Context::index(user_id))
 }
 
 #[get("/login")]
@@ -165,10 +140,7 @@ fn login_page(flash: Option<FlashMessage<'_>>, cookies: &CookieJar<'_>) -> Resul
     let msg = flash.map(|flash| format!("{}", flash.message()))
         .unwrap_or_else(|| "none".to_string());
 
-    return Ok(Template::render("login", &LoginContext{
-        user_id: "none".to_string(),
-        message: msg
-    }));
+    return Ok(Template::render("login", Context::login("none".to_string(), msg)));
 }
 
 #[get("/register")]
@@ -181,10 +153,7 @@ fn register(flash: Option<FlashMessage<'_>>, cookies: &CookieJar<'_>) -> Result<
     let msg = flash.map(|flash| format!("{}", flash.message()))
         .unwrap_or_else(|| "none".to_string());
 
-    return Ok(Template::render("register", &LoginContext{
-        user_id: "none".to_string(),
-        message: msg
-    }));
+    return Ok(Template::render("register", Context::login("none".to_string(), msg)));
 }
 
 #[get("/about")]
@@ -196,46 +165,48 @@ fn about(cookies: &CookieJar<'_>) -> Template {
         user_id = cookie.unwrap().value().to_string();
     }
 
-    Template::render("about", &IndexContext{
-        user_id: user_id
-    })
+    Template::render("about", Context::index(user_id))
 }
 
 // ------ Projects "/projects" Handlers ------
-impl ProjectContext{
-    fn new(paths: Vec<String>, file_names: Vec<String>, user_id: String) -> ProjectContext{ 
-        ProjectContext {
-            user_id: user_id,
-            paths: paths,
-            file_names: file_names,
-            project_name: "Rust Site".to_string(),
-            project_desc: "Website Created With Rust".to_string()
-        }
-    }
-}
-
 #[get("/<project_name>")]
 fn projects(project_name: String, cookies: &CookieJar<'_>) -> Template{
-    
     let cookie = cookies.get_private("user_id");
     let mut user_id = "none".to_string();
     
     if cookie.is_none() == false{
         user_id = cookie.unwrap().value().to_string();
     }
-    
-    let projects: HashMap<String, ProjectContext> = HashMap::from([
-        ("rust-site".to_string(), ProjectContext::new(
-            vec!["/static/rust-site/main.rs".to_string(), "/static/rust-site/index.html.tera".to_string()], 
-            vec!["src/main.rs".to_string(), "templates/index.html.tera".to_string()], 
-            user_id
+
+    let map = HashMap::from([
+        ("rust-site".to_string(), Context::project(
+            user_id,
+            vec![
+                "/static/rust-site/main.rs".to_string(),
+                "/static/rust-site/contexts.rs".to_string(), 
+                "/static/rust-site/index.html.tera".to_string(),
+                "/static/rust-site/header.html.tera".to_string(),
+                "/static/rust-site/login.html.tera".to_string(),
+                "/static/rust-site/project_site.html.tera".to_string(),
+                ], 
+            vec![
+                "src/main.rs".to_string(),
+                "src/contexts.rs".to_string(),
+                "templates/index.html.tera".to_string(),
+                "templates/header.html.tera".to_string(),
+                "templates/login.html.tera".to_string(),
+                "templates/project_site.html.tera".to_string(),
+                ], 
+            "Rust Site".to_string(),
+            "Website Made With Rust".to_string()
         ))
     ]);
+    let current_context = map.get(&project_name).unwrap();
+    println!("{}", current_context.user_id);
 
-    Template::render("project_site", projects.get(&project_name).unwrap())
+    
+    Template::render("project_site", current_context)
 }
-
-
 
 // ------ Launch Site ------
 #[launch]
