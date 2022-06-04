@@ -2,7 +2,7 @@ use rocket::serde::{Deserialize, Serialize, json::{Json}};
 
 pub trait IContextData {}
 
-#[derive(serde::Serialize)]
+#[derive(Serialize)]
 pub struct Context<T: IContextData>{
     pub user_id: String,
     pub info: T
@@ -51,12 +51,12 @@ impl Context<ProjectContext>{
     }
 }
 
-#[derive(serde::Serialize)]
+#[derive(Serialize)]
 pub struct IndexContext {}
 
 impl IContextData for IndexContext {}
 
-#[derive(serde::Serialize)]
+#[derive(Serialize)]
 pub struct LoginContext {
     //user_id: String,
     pub message: String
@@ -64,14 +64,14 @@ pub struct LoginContext {
 
 impl IContextData for LoginContext {}
 
-#[derive(serde::Serialize)]
+#[derive(Serialize)]
 pub struct AboutContext{
     //user_id: String
 }
 
 impl IContextData for AboutContext {}
 
-#[derive(serde::Serialize)]
+#[derive(Serialize)]
 pub struct ProjectContext{
     pub paths: Vec<String>,
     pub file_names: Vec<String>,
