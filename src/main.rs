@@ -3,10 +3,10 @@ use rocket::request::FlashMessage;
 use rocket::response::{Flash, Redirect};
 use rocket::form::Form;
 use rocket::fs::{FileServer, relative};
-use rocket::http::{Status, CookieJar, Cookie};
+use rocket::http::{CookieJar, Cookie};
 use rocket_dyn_templates::{Template};
 use std::collections::HashMap;
-use rocket::serde::{Deserialize, Serialize, json::Json};
+use rocket::serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{Write, BufReader, BufRead};
 use std::fs::OpenOptions;
@@ -15,6 +15,8 @@ use crypto::sha3::Sha3;
 
 mod contexts;
 use contexts::Context;
+
+mod constants;
 
 //----- Data ----
 #[derive(Deserialize)]
@@ -49,7 +51,7 @@ fn hash_pass(password: &String) -> String{
 }
 
 fn find_user(user: String) -> bool {
-    let input = File::open("C:/Users/tyler/OneDrive/Desktop/RustStuff/our-site/site-server/src/users.txt");
+    let input = File::open(constants::USER_PATH);
     let buffer = BufReader::new(input.unwrap());
 
     for line in buffer.lines(){
@@ -75,7 +77,7 @@ fn create(create_info: Form<CreateInfo>) -> Result<Redirect, Flash<Redirect>> {
     let mut file = OpenOptions::new()
         .write(true)
         .append(true)
-        .open("C:/Users/tyler/OneDrive/Desktop/RustStuff/our-site/site-server/src/users.txt")
+        .open(constants::USER_PATH)
         .unwrap();
 
     if let Err(_e) = writeln!(file, "{}:{}", create_info.username, pass_hash){
@@ -88,16 +90,14 @@ fn create(create_info: Form<CreateInfo>) -> Result<Redirect, Flash<Redirect>> {
 
 #[post("/login", data="<login_info>")]
 fn login(login_info: Form<LoginInfo>, cookies: &CookieJar<'_>) -> Result<Redirect, Flash<Redirect>> {
-    let input = File::open("C:/Users/tyler/OneDrive/Desktop/RustStuff/our-site/src/users.txt");
+    let input = File::open(constants::USER_PATH);
     let buffer = BufReader::new(input.unwrap());
 
-    println!("test0");
     for line in buffer.lines(){
         let l: String = line.unwrap();
         let parts: Vec<&str> = l.split(":").collect();
 
         if parts[0].eq(&login_info.username){
-            println!("test2");
             let hash = hash_pass(&login_info.password);
             if parts[1] == hash{
                 cookies.add_private(Cookie::new("user_id", login_info.username.clone()));    
@@ -108,7 +108,6 @@ fn login(login_info: Form<LoginInfo>, cookies: &CookieJar<'_>) -> Result<Redirec
             break;
         }      
     }
-    println!("test1");
     Ok(Redirect::to(uri!(index)))
 }
 
