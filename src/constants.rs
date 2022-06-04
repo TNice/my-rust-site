@@ -1,1 +1,0 @@
-pub const USER_PATH: &str = "C:/Users/tyler/OneDrive/Desktop/RustStuff/our-site/site-server/src/users.txt";
