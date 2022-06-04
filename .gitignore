@@ -1,2 +1,4 @@
 /target
 /static/rust-site
+/src/constants.rs
+/src/users.txt
