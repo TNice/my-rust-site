@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% include "header" %}
+
+<body>
+    <h1 style="text-align:center">{{ project_name }}</h1>
+    <h3 style="text-align:center">{{ project_desc }}</h3>
+    <br><br>
+    <div class="row" style="min-height:80%">
+        <div class="col-1"></div>
+        <div class="col-3">
+            <h4>/{{project_name}}/</h4>
+            <select id="selection">               
+                {% for path in paths %}
+                    {% set idx = loop.index0 %}
+                    <option value="{{path}}">{{file_names | nth(n=idx)}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-8">
+            <iframe class="code" id="frame" src="{{paths | nth(n=0)}}"></iframe>
+        </div>
+    </div>
+</body>
+
+<footer>
+    <script src="/static/project.js"></script>
+</footer>

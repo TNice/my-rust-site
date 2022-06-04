@@ -35,9 +35,7 @@ struct AboutContext{
 struct ProjectContext{
     user_id: String,
     paths: Vec<String>,
-    file_names: Vec<String>,
-    project_name: String,
-    project_desc: String
+    file_names: Vec<String>
 }
 
 #[derive(Deserialize)]
@@ -207,9 +205,7 @@ impl ProjectContext{
         ProjectContext {
             user_id: user_id,
             paths: paths,
-            file_names: file_names,
-            project_name: "Rust Site".to_string(),
-            project_desc: "Website Created With Rust".to_string()
+            file_names: file_names
         }
     }
 }
@@ -225,9 +221,8 @@ fn projects(project_name: String, cookies: &CookieJar<'_>) -> Template{
     }
     
     let projects: HashMap<String, ProjectContext> = HashMap::from([
-        ("rust-site".to_string(), ProjectContext::new(
-            vec!["/static/rust-site/main.rs".to_string(), "/static/rust-site/index.html.tera".to_string()], 
-            vec!["src/main.rs".to_string(), "templates/index.html.tera".to_string()], 
+        ("rust-site".to_string(), ProjectContext::new(vec!["/static/rust-site/main.rs".to_string()], 
+            vec!["src/main.rs".to_string()], 
             user_id
         ))
     ]);
